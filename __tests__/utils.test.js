@@ -9,7 +9,7 @@ describe("formatDates", () => {
     const input = [];
     const inputObj = { created_at: 0 };
     input[0] = inputObj;
-    const expectedUnixTimestamp = new Date(0).toISOString();
+    const expectedUnixTimestamp = new Date(0);
     const expectedOutput = [{ created_at: expectedUnixTimestamp }];
     const output = formatDates(input);
     expect(output).toEqual(expectedOutput);
@@ -28,9 +28,9 @@ describe("formatDates", () => {
         votes: 10,
       },
     ];
-    const expectedDatetime = new Date(created_at).toISOString();
+    const expectedDatetime = new Date(created_at);
     const output = formatDates(input);
-    expect(output[0].created_at).toBe(expectedDatetime);
+    expect(output[0].created_at).toEqual(expectedDatetime);
     expect(output[0]).toEqual(
       expect.objectContaining({
         title: String(input[0].title),
@@ -62,11 +62,11 @@ describe("formatDates", () => {
         votes: 5,
       },
     ];
-    const expectedDatetime0 = new Date(created_at0).toISOString();
-    const expectedDatetime1 = new Date(created_at1).toISOString();
+    const expectedDatetime0 = new Date(created_at0);
+    const expectedDatetime1 = new Date(created_at1);
     const output = formatDates(input);
-    expect(output[0].created_at).toBe(expectedDatetime0);
-    expect(output[1].created_at).toBe(expectedDatetime1);
+    expect(output[0].created_at).toEqual(expectedDatetime0);
+    expect(output[1].created_at).toEqual(expectedDatetime1);
     output.forEach((outputObj, i) => {
       expect(outputObj).toEqual(
         expect.objectContaining({
@@ -81,6 +81,158 @@ describe("formatDates", () => {
   });
 });
 
-describe("makeRefObj", () => {});
+describe("makeRefObj", () => {
+  test("returns an empty object when passed an empty array", () => {
+    expect(makeRefObj([])).toEqual({});
+  });
+  test("works for an array with 1 article object", () => {
+    const input = [
+      {
+        article_id: 5,
+        title: "Living in the shadow of a great man",
+        topic: "mitch",
+        author: "butter_bridge",
+        body: "I find this existence challenging",
+        created_at: 1542284514171,
+        votes: 100,
+      },
+    ];
+    const expectedOutput = {
+      "Living in the shadow of a great man": 5,
+    };
+    expect(makeRefObj(input)).toEqual(expectedOutput);
+  });
+  test("works for multiple articles", () => {
+    const input = [
+      {
+        article_id: 12,
+        title: "article title",
+        topic: "My boring title",
+        author: "A. N. Other",
+        body: "blah",
+        created_at: 6945238701593,
+        votes: 10,
+      },
+      {
+        article_id: 58,
+        title: "The joy of Pig Farming",
+        topic: "Self-sufficiency",
+        author: "Chris P. Bacon",
+        body: "blah blah blah ",
+        created_at: 5945239101507,
+        votes: 100,
+      },
+    ];
+    const expectedOutput = {
+      "article title": 12,
+      "The joy of Pig Farming": 58,
+    };
+    expect(makeRefObj(input)).toEqual(expectedOutput);
+  });
+});
 
-describe("formatComments", () => {});
+describe("formatComments", () => {
+  test("works for a single comment, and does not mutate the original comment", () => {
+    const inputArticles = [
+      {
+        article_id: 12,
+        title: "article title",
+        topic: "My boring title",
+        author: "A. N. Other",
+        body: "blah",
+        created_at: 6945238701593,
+        votes: 10,
+      },
+    ];
+    const inputComments = [
+      {
+        body: "blah",
+        belongs_to: "article title",
+        created_by: "comment_author",
+        votes: 16,
+        created_at: 1511354163389,
+      },
+    ];
+    const refObj = makeRefObj(inputArticles);
+    const expectedCreatedAt = new Date(inputComments[0].created_at);
+    const expectedOutput = [
+      {
+        body: "blah",
+        article_id: 12,
+        author: "comment_author",
+        votes: 16,
+        created_at: expectedCreatedAt,
+      },
+    ];
+    const output = formatComments(inputComments, refObj);
+    expect(output).toEqual(expectedOutput);
+    expect(inputComments[0]).toEqual(
+      expect.objectContaining({
+        body: "blah",
+        belongs_to: "article title",
+        created_by: "comment_author",
+        votes: 16,
+        created_at: 1511354163389,
+      })
+    );
+  });
+  test("works for multiple comments", () => {
+    const inputArticles = [
+      {
+        article_id: 12,
+        title: "article title A",
+        topic: "Topic 1",
+        author: "A. N. Other",
+        body: "blah",
+        created_at: 6945238701593,
+        votes: 10,
+      },
+      {
+        article_id: 17,
+        title: "article title B",
+        topic: "Topic 2",
+        author: "Chris P. Bacon",
+        body: "sizzle",
+        created_at: 7949681301528,
+        votes: 12,
+      },
+    ];
+    const inputComments = [
+      {
+        body: "blah blah",
+        belongs_to: "article title A",
+        created_by: "comment_author A",
+        votes: 2,
+        created_at: 1511354163389,
+      },
+      {
+        body: "blah blah blah",
+        belongs_to: "article title B",
+        created_by: "comment_author B",
+        votes: 7,
+        created_at: 4968134163389,
+      },
+    ];
+    const refObj = makeRefObj(inputArticles);
+    const expectedCreatedAt0 = new Date(inputComments[0].created_at);
+    const expectedCreatedAt1 = new Date(inputComments[1].created_at);
+    const expectedOutput = [
+      {
+        body: "blah blah",
+        article_id: 12,
+        author: "comment_author A",
+        votes: 2,
+        created_at: expectedCreatedAt0,
+      },
+      {
+        body: "blah blah blah",
+        article_id: 17,
+        author: "comment_author B",
+        votes: 7,
+        created_at: expectedCreatedAt1,
+      },
+    ];
+    const output = formatComments(inputComments, refObj);
+    expect(output).toEqual(expectedOutput);
+  });
+});
