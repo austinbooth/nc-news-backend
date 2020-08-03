@@ -1,30 +1,29 @@
-const ENV = process.env.NODE_ENV || 'development';
+const ENV = process.env.NODE_ENV || "development";
+const userInfo = require("./user.info");
 
 const baseConfig = {
-  client: 'pg',
+  client: "pg",
   migrations: {
-    directory: './db/migrations'
+    directory: "./db/migrations",
   },
   seeds: {
-    directory: './db/seeds'
-  }
+    directory: "./db/seeds",
+  },
 };
 
 const customConfig = {
   development: {
     connection: {
-      database: 'nc_news'
-      // user,
-      // password
-    }
+      database: "nc_news",
+      ...userInfo,
+    },
   },
   test: {
     connection: {
-      database: 'nc_news_test'
-      // user,
-      // password
-    }
-  }
+      database: "nc_news_test",
+      ...userInfo,
+    },
+  },
 };
 
 module.exports = { ...customConfig[ENV], ...baseConfig };

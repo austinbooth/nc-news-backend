@@ -13,6 +13,7 @@ exports.seed = function(knex) {
 
   return Promise.all([topicsInsertions, usersInsertions])
     .then(() => {
+      
       /* 
       
       Your article data is currently in the incorrect format and will violate your SQL schema. 
