@@ -43,13 +43,32 @@ describe("app", () => {
             );
           });
       });
-      it("GET: 404 - responds with an appropriate error code and message when an invalid username is given", () => {
-        return (
-          request(app)
-            .get("/api/users/hello")
-            .expect(404)
-            .then(({body: {msg}}) => expect(msg).toBe("User not found"))
-        );
+      it("GET: 404 - responds with an appropriate error code and message when a valid but non-existent username is given", () => {
+        return request(app)
+          .get("/api/users/hello")
+          .expect(404)
+          .then(({ body: { msg } }) => expect(msg).toBe("User not found"));
+      });
+    });
+    describe("/articles", () => {
+      it("GET: 200 - responds with an article when given a valid article id", () => {
+        return request(app)
+          .get("/api/articles/1")
+          .expect(200)
+          .then(({ body: { article } }) => {
+            expect(article).toEqual(
+              expect.objectContaining({
+                author: "butter_bridge",
+                title: "Living in the shadow of a great man",
+                article_id: 1,
+                body: "I find this existence challenging",
+                topic: "mitch",
+                created_at: new Date(1542284514171).toISOString(),
+                votes: 100,
+                comment_count: 13,
+              })
+            );
+          });
       });
     });
   });
