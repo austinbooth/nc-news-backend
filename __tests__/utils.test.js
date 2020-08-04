@@ -6,11 +6,11 @@ const {
 
 describe("formatDates", () => {
   test("returns a new object", () => {
+    const timestamp = 0;
     const input = [];
-    const inputObj = { created_at: 0 };
+    const inputObj = { created_at: timestamp };
     input[0] = inputObj;
-    const expectedUnixTimestamp = new Date(0);
-    const expectedOutput = [{ created_at: expectedUnixTimestamp }];
+    const expectedOutput = [{ created_at: new Date(timestamp) }];
     const output = formatDates(input);
     expect(output).toEqual(expectedOutput);
     expect(output).not.toBe(input);
