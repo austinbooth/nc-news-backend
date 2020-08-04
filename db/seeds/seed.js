@@ -11,7 +11,10 @@ exports.seed = function (knex) {
   const topicsInsertions = knex("topics").insert(topicData);
   const usersInsertions = knex("users").insert(userData);
 
-  return Promise.all([topicsInsertions, usersInsertions])
+  return knex.migrate
+    .rollback()
+    .then(() => knex.migrate.latest())
+    .then(() => Promise.all([topicsInsertions, usersInsertions]))
     .then(() => {
       const reformattedArticleData = formatDates(articleData);
       return knex("articles").insert(reformattedArticleData).returning("*");

@@ -8,7 +8,6 @@
     "seed": "knex seed:run",
     "migrate-latest": "knex migrate:latest",
     "migrate-rollback": "knex migrate:rollback",
-    "seed-from-scratch": "npm run setup-dbs && npm run migrate-latest && npm run seed && NODE_ENV=test npm run migrate-latest && NODE_ENV=test npm run seed",
     "test": "jest --watch"
   },
   "repository": {
