@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  console.log("Creating users table...");
+  if (process.env.NODE_ENV !== "test") console.log("Creating users table...");
 
   return knex.schema.createTable("users", (usersTable) => {
     usersTable.string("username").primary().unique().notNullable();
@@ -9,6 +9,6 @@ exports.up = function (knex) {
 };
 
 exports.down = function (knex) {
-  console.log("Dropping users table...");
+  if (process.env.NODE_ENV !== "test") console.log("Dropping users table...");
   return knex.schema.dropTable("users");
 };

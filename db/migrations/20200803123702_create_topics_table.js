@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  console.log("Creating topics table...");
+  if (process.env.NODE_ENV !== "test") console.log("Creating topics table...");
 
   return knex.schema.createTable("topics", (topicsTable) => {
     topicsTable.string("slug").primary().notNullable();
@@ -8,6 +8,6 @@ exports.up = function (knex) {
 };
 
 exports.down = function (knex) {
-  console.log("Dropping topics table...");
+  if (process.env.NODE_ENV !== "test") console.log("Dropping topics table...");
   return knex.schema.dropTable("topics");
 };

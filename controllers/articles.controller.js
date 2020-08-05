@@ -1,10 +1,26 @@
-const { fetchArticle } = require("../models/articles.model");
+const {
+  fetchArticle,
+  modifyArticleVotes,
+} = require("../models/articles.model");
 
-exports.getArticle = (req, res) => {
+exports.getArticle = (req, res, next) => {
   fetchArticle(req.params)
     .then((article) => {
-      console.log(article);
       res.status(200).send({ article });
     })
-    .catch((err) => next(err));
+    .catch((err) => {
+      err.reason = "article id";
+      return next(err);
+    });
+};
+
+exports.patchArticleVotes = (req, res, next) => {
+  modifyArticleVotes(req.params, req.body)
+    .then((article) => {
+      res.status(200).send({ article });
+    })
+    .catch((err) => {
+      err.reason = "article id";
+      return next(err);
+    });
 };
