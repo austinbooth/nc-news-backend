@@ -3,10 +3,19 @@ const {
   getArticle,
   patchArticleVotes,
 } = require("../controllers/articles.controller");
-const { postComment } = require("../controllers/comments.controller");
+const {
+  postComment,
+  getCommentsByArticleId,
+} = require("../controllers/comments.controller");
+const { handle405sInvalidMethods } = require("../errors");
 
 articlesRouter.get("/:article_id", getArticle);
 articlesRouter.patch("/:article_id", patchArticleVotes);
-articlesRouter.post("/:article_id/comments", postComment);
+
+articlesRouter
+  .route("/:article_id/comments")
+  .post(postComment)
+  .get(getCommentsByArticleId)
+  .all(handle405sInvalidMethods);
 
 module.exports = articlesRouter;

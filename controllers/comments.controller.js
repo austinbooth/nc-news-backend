@@ -1,4 +1,8 @@
-const { addComment } = require("../models/comments.model");
+const {
+  addComment,
+  fetchCommentsByArticleId,
+} = require("../models/comments.model");
+const { checkIfArticleExists } = require("../models/articles.model");
 
 exports.postComment = (req, res, next) => {
   if (req.body.username === undefined || req.body.username.length === 0)
@@ -15,5 +19,17 @@ exports.postComment = (req, res, next) => {
         err.reason = "username";
       else err.reason = "article id";
       return next(err);
+    });
+};
+
+exports.getCommentsByArticleId = (req, res, next) => {
+  Promise.all([
+    fetchCommentsByArticleId(req.params),
+    checkIfArticleExists(req.params),
+  ])
+    .then(([comments]) => res.status(200).send({ comments }))
+    .catch((err) => {
+      err.reason = "article id";
+      next(err);
     });
 };

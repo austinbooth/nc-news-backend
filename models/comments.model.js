@@ -1,5 +1,4 @@
 const db = require("../db/connection");
-const knexfile = require("../knexfile");
 
 exports.addComment = ({ article_id }, { username: author, body }) => {
   return db("comments")
@@ -13,4 +12,8 @@ exports.addComment = ({ article_id }, { username: author, body }) => {
       comment[0].created_at = comment[0].created_at.toISOString();
       return comment[0];
     });
+};
+
+exports.fetchCommentsByArticleId = ({ article_id }) => {
+  return db.select().from("comments").where("article_id", article_id);
 };

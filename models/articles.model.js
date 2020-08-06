@@ -30,3 +30,13 @@ exports.modifyArticleVotes = ({ article_id }, { inc_votes }) => {
       })
   );
 };
+
+exports.checkIfArticleExists = ({ article_id }) => {
+  return db("articles")
+    .where({ article_id })
+    .then((article) => {
+      if (article.length === 0)
+        return Promise.reject({ status: 404, msg: "Article not found" });
+      return article;
+    });
+};

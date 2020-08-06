@@ -214,9 +214,61 @@ describe("app", () => {
               expect(msg).toBe("Invalid - body not given")
             );
         });
-        // it("GET: 200 - responds with all the comments for the given article_id", () => {
-        //   return request(app).get("/api/articles/1/comments").expect(200);
-        // });
+        it("GET: 200 - responds with all the comments for the given article_id", () => {
+          return request(app)
+            .get("/api/articles/1/comments")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(Array.isArray(comments)).toBe(true);
+              expect(comments.length).toBe(13);
+              expect(comments[0]).toEqual(
+                expect.objectContaining({
+                  comment_id: 2,
+                  author: "butter_bridge",
+                  article_id: 1,
+                  votes: 14,
+                  created_at: "2016-11-22T12:36:03.389Z",
+                  body:
+                    "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+                })
+              );
+            });
+        });
+        it("GET: 200 - responds with an empty array when there are no comments for an article_id which exists", () => {
+          return request(app)
+            .get("/api/articles/2/comments")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(Array.isArray(comments)).toBe(true);
+              expect(comments.length).toBe(0);
+            });
+        });
+        it("GET: 404 - responds with an appropriate error when a valid but non-existent article_id is used", () => {
+          return request(app)
+            .get("/api/articles/999/comments")
+            .expect(404)
+            .then(({ body: { msg } }) => expect(msg).toBe("Article not found"));
+        });
+        it("GET: 400 - responds with an appropriate error when an invalid article_id is used", () => {
+          return request(app)
+            .get("/api/articles/ilovejs/comments")
+            .expect(400)
+            .then(({ body: { msg } }) =>
+              expect(msg).toBe("Invalid article id")
+            );
+        });
+        it("Invalid methods: 405 - responds with an appropriate error", () => {
+          const invalidMethods = ["patch", "put", "delete"];
+          const promises = invalidMethods.map((method) => {
+            return request(app)
+              [method]("/api/articles/1/comments")
+              .expect(405)
+              .then(({ body: { msg } }) =>
+                expect(msg).toBe("Method not allowed")
+              );
+          });
+          return Promise.all(promises);
+        });
       });
     });
   });
