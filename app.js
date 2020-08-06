@@ -9,6 +9,7 @@ app.use("/api", apiRouter);
 app.use(handlePSQL400Errors);
 app.use(handlePSQL404Errors);
 app.use(handleCustomErrors);
+app.use(handle500s);
 
 function handlePSQL400Errors(err, req, res, next) {
   if (err.code === "22P02")
@@ -23,7 +24,13 @@ function handlePSQL404Errors(err, req, res, next) {
 }
 
 function handleCustomErrors(err, req, res, next) {
-  res.status(err.status).send({ msg: err.msg });
+  if (err.status) res.status(err.status).send({ msg: err.msg });
+  else next(err);
+}
+
+function handle500s(err, req, res, next) {
+  console.log(err);
+  res.status(500).send("Server error");
 }
 
 module.exports = app;

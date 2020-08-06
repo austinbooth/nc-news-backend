@@ -31,6 +31,12 @@
     "@types/knex": "^0.16.1",
     "@types/supertest": "^2.0.10",
     "jest": "^26.2.2",
+    "jest-sorted": "^1.0.6",
     "supertest": "^4.0.2"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "jest-sorted"
+    ]
   }
 }

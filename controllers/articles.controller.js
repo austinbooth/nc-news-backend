@@ -1,6 +1,7 @@
 const {
   fetchArticle,
   modifyArticleVotes,
+  fetchAllArticles,
 } = require("../models/articles.model");
 
 exports.getArticle = (req, res, next) => {
@@ -23,4 +24,12 @@ exports.patchArticleVotes = (req, res, next) => {
       err.reason = "article id";
       return next(err);
     });
+};
+
+exports.getAllArticles = (req, res, next) => {
+  fetchAllArticles()
+    .then((articles) => {
+      return res.status(200).send({ articles });
+    })
+    .catch((err) => next(err));
 };
