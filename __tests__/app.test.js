@@ -26,6 +26,18 @@ describe("app", () => {
             );
           });
       });
+      it("Invalid methods: 405 - responds with an appropriate error", () => {
+        const invalidMethods = ["post", "patch", "put", "delete"];
+        const promises = invalidMethods.map((method) => {
+          return request(app)
+            [method]("/api/topics")
+            .expect(405)
+            .then(({ body: { msg } }) =>
+              expect(msg).toBe("Method not allowed")
+            );
+        });
+        return Promise.all(promises);
+      });
     });
     describe("/users", () => {
       it("GET: 200 - responds with the correct user", () => {
@@ -48,6 +60,18 @@ describe("app", () => {
           .get("/api/users/hello")
           .expect(404)
           .then(({ body: { msg } }) => expect(msg).toBe("User not found"));
+      });
+      it("Invalid methods: 405 - responds with an appropriate error", () => {
+        const invalidMethods = ["post", "patch", "put", "delete"];
+        const promises = invalidMethods.map((method) => {
+          return request(app)
+            [method]("/api/users")
+            .expect(405)
+            .then(({ body: { msg } }) =>
+              expect(msg).toBe("Method not allowed")
+            );
+        });
+        return Promise.all(promises);
       });
     });
     describe("/articles", () => {
@@ -72,20 +96,105 @@ describe("app", () => {
             expect(articles[0]).not.toHaveProperty("body");
           });
       });
-      it("GET: 200 - default sorts the array objects by date", () => {
-        return request(app).get("/api/articles").expect(200);
-        // .then(
-        //   ({ body: { articles } }) =>
-        //     // expect([
-        //     //   { title: "3" },
-        //     //   { title: "9" },
-        //     //   { title: "10" },
-        //     // ]).toBeSortedBy("title", {
-        //     //   descending: false,
-        //     //   coerce: true,
-        //     // })
-        //   // console.log(articles)
-        // )
+      it("GET: 200 - default sorts the array objects by date in descending order", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) =>
+            expect(articles).toBeSortedBy("created_at", {
+              descending: true,
+            })
+          );
+      });
+      it("GET: 200 - default sorts the array objects by date in ascending order when given 'order' as a query", () => {
+        return request(app)
+          .get("/api/articles?order=asc")
+          .expect(200)
+          .then(({ body: { articles } }) =>
+            expect(articles).toBeSortedBy("created_at", {
+              descending: false,
+            })
+          );
+      });
+      it("GET: 200 - sorts the array objects by all columns where values are returned as strings", () => {
+        const cols = ["author", "title", "topic", "votes"];
+        const promises = cols.map((col) => {
+          return request(app)
+            .get(`/api/articles?sort_by=${col}`)
+            .expect(200)
+            .then(({ body: { articles } }) =>
+              expect(articles).toBeSortedBy(col, {
+                descending: true,
+              })
+            );
+        });
+        return Promise.all(promises);
+      });
+      it("GET: 200 - sorts the array objects by all columns where values are returned as numbers", () => {
+        const cols = ["article_id", "created_at", "comment_count"];
+        const promises = cols.map((col) => {
+          return request(app)
+            .get(`/api/articles?sort_by=${col}`)
+            .expect(200)
+            .then(({ body: { articles } }) =>
+              expect(articles).toBeSortedBy(col, {
+                descending: true,
+                coerce: true,
+              })
+            );
+        });
+        return Promise.all(promises);
+      });
+      it("GET: 400 - returns an appropriate error message for an invalid value for sort_by", () => {
+        return request(app)
+          .get("/api/articles?sort_by=hello")
+          .expect(400)
+          .then(({ body: { msg } }) => expect(msg).toBe("Invalid column"));
+      });
+      it("GET: 400 - returns an appropriate error message for an invalid value for order", () => {
+        return request(app)
+          .get("/api/articles?sort_by=author&order=pie")
+          .expect(400)
+          .then(({ body: { msg } }) => expect(msg).toBe("Invalid query"));
+      });
+      it("GET: 200 - returns articles filtered by author", () => {
+        return request(app)
+          .get("/api/articles?author=butter_bridge")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(Array.isArray(articles)).toBe(true);
+            expect(articles.length).toBe(3);
+          });
+      });
+      it("GET: 200 - returns articles filtered by topic", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(Array.isArray(articles)).toBe(true);
+            expect(articles.length).toBe(11);
+          });
+      });
+      it("GET: 200 - returns no articles when given a topic which doesn't exist", () => {
+        return request(app)
+          .get("/api/articles?topic=mitchh")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(Array.isArray(articles)).toBe(true);
+            expect(articles.length).toBe(0);
+          });
+      });
+      it("Invalid methods: 405 - responds with an appropriate error", () => {
+        const invalidMethods = ["post", "patch", "put", "delete"];
+        const promises = invalidMethods.map((method) => {
+          return request(app)
+            [method]("/api/articles")
+            .expect(405)
+            .then(({ body: { msg } }) =>
+              expect(msg).toBe("Method not allowed")
+            );
+        });
+        return Promise.all(promises);
       });
       describe("/articles/:article_id", () => {
         it("GET: 200 - responds with an article when given a valid article id", () => {
@@ -249,6 +358,18 @@ describe("app", () => {
                 })
               );
             });
+        });
+        it("Invalid methods: 405 - responds with an appropriate error", () => {
+          const invalidMethods = ["post", "put", "delete"];
+          const promises = invalidMethods.map((method) => {
+            return request(app)
+              [method]("/api/articles/1")
+              .expect(405)
+              .then(({ body: { msg } }) =>
+                expect(msg).toBe("Method not allowed")
+              );
+          });
+          return Promise.all(promises);
         });
         describe("/articles/:article_id/comments", () => {
           it("POST: 201 - inserts a comment into the db and returns it", () => {
@@ -474,7 +595,7 @@ describe("app", () => {
               expect(comment.votes).toBe(16);
             });
         });
-        it.only("DELETE: 204 - deletes an existing comment by comment_id", () => {
+        it("DELETE: 204 - deletes an existing comment by comment_id", () => {
           return request(app)
             .del("/api/comments/1")
             .expect(204)
@@ -483,19 +604,31 @@ describe("app", () => {
             })
             .then((response) => expect(response.length).toBe(0));
         });
-        it.only("DELETE: 404 - returns an appropriate error when a valid but non-existent comment_id is given", () => {
+        it("DELETE: 404 - returns an appropriate error when a valid but non-existent comment_id is given", () => {
           return request(app)
             .del("/api/comments/999")
             .expect(404)
             .then(({ body: { msg } }) => expect(msg).toBe("Comment not found"));
         });
-        it.only("DELETE: 400 - returns an appropriate error when an invalid comment_id is given", () => {
+        it("DELETE: 400 - returns an appropriate error when an invalid comment_id is given", () => {
           return request(app)
             .del("/api/comments/bacon")
             .expect(400)
             .then(({ body: { msg } }) =>
               expect(msg).toBe("Invalid comment id")
             );
+        });
+        it("Invalid methods: 405 - responds with an appropriate error", () => {
+          const invalidMethods = ["get", "post", "put"];
+          const promises = invalidMethods.map((method) => {
+            return request(app)
+              [method]("/api/comments/1")
+              .expect(405)
+              .then(({ body: { msg } }) =>
+                expect(msg).toBe("Method not allowed")
+              );
+          });
+          return Promise.all(promises);
         });
       });
     });

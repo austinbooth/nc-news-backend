@@ -27,9 +27,14 @@ exports.patchArticleVotes = (req, res, next) => {
 };
 
 exports.getAllArticles = (req, res, next) => {
-  fetchAllArticles()
+  const { sort_by, order, author, topic } = req.query;
+
+  fetchAllArticles(sort_by, order, author, topic)
     .then((articles) => {
       return res.status(200).send({ articles });
     })
-    .catch((err) => next(err));
+    .catch((err) => {
+      err.reason = "column";
+      return next(err);
+    });
 };

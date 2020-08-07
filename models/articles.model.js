@@ -42,20 +42,32 @@ exports.checkIfArticleExists = ({ article_id }) => {
     });
 };
 
-exports.fetchAllArticles = () => {
-  return db("articles")
-    .select([
-      "articles.author",
-      "articles.title",
-      "articles.article_id",
-      "articles.topic",
-      "articles.created_at",
-      "articles.votes",
-    ])
-    .leftJoin("comments", "articles.article_id", "comments.article_id")
-    .groupBy("articles.article_id")
-    .count({ comment_count: "comments.comment_id" })
-    .then((articles) => {
-      return articles;
-    });
+exports.fetchAllArticles = (
+  orderBy = "created_at",
+  order = "desc",
+  author,
+  topic
+) => {
+  if (order === "asc" || order === "desc") {
+    return db("articles")
+      .select([
+        "articles.author",
+        "articles.title",
+        "articles.article_id",
+        "articles.topic",
+        "articles.created_at",
+        "articles.votes",
+      ])
+      .modify((query) => {
+        if (author) query.where("articles.author", author);
+        if (topic) query.where("articles.topic", topic);
+      })
+      .leftJoin("comments", "articles.article_id", "comments.article_id")
+      .groupBy("articles.article_id")
+      .count({ comment_count: "comments.comment_id" })
+      .orderBy(orderBy, order)
+      .then((articles) => {
+        return articles;
+      });
+  } else return Promise.reject({ status: 400, msg: "Invalid query" });
 };
