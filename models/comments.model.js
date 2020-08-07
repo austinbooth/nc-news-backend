@@ -35,3 +35,14 @@ exports.updateCommentVotes = ({ comment_id }, { inc_votes }) => {
       return comment[0];
     });
 };
+
+exports.removeCommentById = ({ comment_id }) => {
+  return db("comments")
+    .where({ comment_id })
+    .del()
+    .returning("*")
+    .then((deleted) => {
+      if (deleted.length === 0)
+        return Promise.reject({ status: 404, msg: "Comment not found" });
+    });
+};

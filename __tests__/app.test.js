@@ -462,7 +462,7 @@ describe("app", () => {
               expect(msg).toBe("Invalid comment id or payload")
             );
         });
-        it.only("PATCH: 200 - ignores other payload properties", () => {
+        it("PATCH: 200 - ignores other payload properties", () => {
           return request(app)
             .patch("/api/comments/1")
             .send({ incc_votes: 1 })
@@ -473,6 +473,29 @@ describe("app", () => {
             .then(([comment]) => {
               expect(comment.votes).toBe(16);
             });
+        });
+        it.only("DELETE: 204 - deletes an existing comment by comment_id", () => {
+          return request(app)
+            .del("/api/comments/1")
+            .expect(204)
+            .then(() => {
+              return db("comments").where("comment_id", 1);
+            })
+            .then((response) => expect(response.length).toBe(0));
+        });
+        it.only("DELETE: 404 - returns an appropriate error when a valid but non-existent comment_id is given", () => {
+          return request(app)
+            .del("/api/comments/999")
+            .expect(404)
+            .then(({ body: { msg } }) => expect(msg).toBe("Comment not found"));
+        });
+        it.only("DELETE: 400 - returns an appropriate error when an invalid comment_id is given", () => {
+          return request(app)
+            .del("/api/comments/bacon")
+            .expect(400)
+            .then(({ body: { msg } }) =>
+              expect(msg).toBe("Invalid comment id")
+            );
         });
       });
     });

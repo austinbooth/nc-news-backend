@@ -2,6 +2,7 @@ const {
   addComment,
   fetchCommentsByArticleId,
   updateCommentVotes,
+  removeCommentById,
 } = require("../models/comments.model");
 const { checkIfArticleExists } = require("../models/articles.model");
 
@@ -38,4 +39,12 @@ exports.patchCommentVotes = (req, res, next) => {
       err.reason = "comment id or payload";
       return next(err);
     });
+};
+
+exports.deleteCommentById = (req, res, next) => {
+  removeCommentById(req.params)
+    .then(() => res.sendStatus(204))
+    .catch((err) => {
+      err.reason = "comment id";
+      return next(err)});
 };
