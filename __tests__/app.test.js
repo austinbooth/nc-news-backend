@@ -51,7 +51,7 @@ describe("app", () => {
       });
     });
     describe("/articles", () => {
-      it.only("GET: 200 - responds with an array of article objects", () => {
+      it("GET: 200 - responds with an array of article objects", () => {
         return request(app)
           .get("/api/articles")
           .expect(200)
@@ -72,22 +72,20 @@ describe("app", () => {
             expect(articles[0]).not.toHaveProperty("body");
           });
       });
-      it.only("GET: 200 - default sorts the array objects by date", () => {
-        return request(app)
-          .get("/api/articles")
-          .expect(200)
-          // .then(
-          //   ({ body: { articles } }) =>
-          //     // expect([
-          //     //   { title: "3" },
-          //     //   { title: "9" },
-          //     //   { title: "10" },
-          //     // ]).toBeSortedBy("title", {
-          //     //   descending: false,
-          //     //   coerce: true,
-          //     // })
-          //   // console.log(articles)
-          // )
+      it("GET: 200 - default sorts the array objects by date", () => {
+        return request(app).get("/api/articles").expect(200);
+        // .then(
+        //   ({ body: { articles } }) =>
+        //     // expect([
+        //     //   { title: "3" },
+        //     //   { title: "9" },
+        //     //   { title: "10" },
+        //     // ]).toBeSortedBy("title", {
+        //     //   descending: false,
+        //     //   coerce: true,
+        //     // })
+        //   // console.log(articles)
+        // )
       });
       describe("/articles/:article_id", () => {
         it("GET: 200 - responds with an article when given a valid article id", () => {
@@ -391,6 +389,90 @@ describe("app", () => {
             });
             return Promise.all(promises);
           });
+        });
+      });
+    });
+    describe("/comments", () => {
+      describe("/comments/:comment_id", () => {
+        it("PATCH: 200 - correctly increments the votes and responds with the updated comment", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: 5 })
+            .expect(200)
+            .then(({ body: { comment } }) => {
+              expect(Array.isArray(comment)).toBe(false);
+              expect(comment.votes).toBe(21);
+              expect(comment.comment_id).toBe(1);
+              expect(comment.author).toBe("butter_bridge");
+              expect(comment.article_id).toBe(9);
+              expect(comment.created_at).toBe("2017-11-22T12:36:03.389Z");
+              expect(comment.body).toBe(
+                "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
+              );
+            });
+        });
+        it("PATCH: 200 - correctly decrements the votes and responds with the updated comment", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: -3 })
+            .expect(200)
+            .then(({ body: { comment } }) => {
+              expect(Array.isArray(comment)).toBe(false);
+              expect(comment.votes).toBe(13);
+              expect(comment.comment_id).toBe(1);
+              expect(comment.author).toBe("butter_bridge");
+              expect(comment.article_id).toBe(9);
+              expect(comment.created_at).toBe("2017-11-22T12:36:03.389Z");
+              expect(comment.body).toBe(
+                "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
+              );
+            });
+        });
+        it("PATCH: 404 - responds with an appropriate error message when a valid but non-existent comment_id is given", () => {
+          return request(app)
+            .patch("/api/comments/999")
+            .send({ inc_votes: -3 })
+            .expect(404)
+            .then(({ body: { msg } }) => expect(msg).toBe("comment not found"));
+        });
+        it("PATCH: 400 - responds with anappropriate error message when an invalid comment_id is given", () => {
+          return request(app)
+            .patch("/api/comments/ilovepie")
+            .send({ inc_votes: -3 })
+            .expect(400)
+            .then(({ body: { msg } }) =>
+              expect(msg).toBe("Invalid comment id or payload")
+            );
+        });
+        it("PATCH: 400 - returns an appropriate error when inc_votes is an empty string", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: "" })
+            .expect(400)
+            .then(({ body: { msg } }) =>
+              expect(msg).toBe("Invalid comment id or payload")
+            );
+        });
+        it("PATCH: 400 - returns an appropriate error when inc_votes is invalid", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: "hello" })
+            .expect(400)
+            .then(({ body: { msg } }) =>
+              expect(msg).toBe("Invalid comment id or payload")
+            );
+        });
+        it.only("PATCH: 200 - ignores other payload properties", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ incc_votes: 1 })
+            .expect(200)
+            .then(() => {
+              return db("comments").where("comment_id", 1);
+            })
+            .then(([comment]) => {
+              expect(comment.votes).toBe(16);
+            });
         });
       });
     });

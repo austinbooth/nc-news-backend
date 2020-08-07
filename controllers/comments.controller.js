@@ -1,6 +1,7 @@
 const {
   addComment,
   fetchCommentsByArticleId,
+  updateCommentVotes,
 } = require("../models/comments.model");
 const { checkIfArticleExists } = require("../models/articles.model");
 
@@ -27,5 +28,14 @@ exports.getCommentsByArticleId = (req, res, next) => {
     .catch((err) => {
       err.reason = "article id";
       next(err);
+    });
+};
+
+exports.patchCommentVotes = (req, res, next) => {
+  updateCommentVotes(req.params, req.body)
+    .then((comment) => res.status(200).send({ comment }))
+    .catch((err) => {
+      err.reason = "comment id or payload";
+      return next(err);
     });
 };
