@@ -1,0 +1,9 @@
+{
+  "endpoints": {
+    "GET /api/users/:username": "Responds with a user object with the following properties: 'username', 'avarar_url' and 'name'.",
+    "GET /api/articles": "Responds with an array of article objects, each of which having the following properties: 'author', which is the username, 'title', 'article_id', 'topic', 'created_at' (human readable timestamp), 'votes' and 'comment_count'",
+    "GET /api/articles/:article_id": "Responds with an article object with the following properties: 'author', which is the username, 'title', 'article_id', 'body', 'topic', 'created_at' (human readable timestamp), 'votes' and 'comment_count'",
+    "PATCH /api/articles/:article_id": "Accepts a payload object in the form { inc_votes : number }, where number is a positive or negative integer. This increments (or decrements when given a negative number) the votes for the article with the specified article_id.",
+    "POST /api/articles/:article_id/comments": ""
+  }
+}

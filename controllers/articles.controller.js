@@ -2,10 +2,15 @@ const {
   fetchArticle,
   modifyArticleVotes,
   fetchAllArticles,
+  checkIfArticleAuthorExists,
 } = require("../models/articles.model");
+const { checkIfTopicExists } = require("../models/topics.model");
 
 exports.getArticle = (req, res, next) => {
-  fetchArticle(req.params)
+  const {
+    params: { article_id },
+  } = req;
+  fetchArticle(article_id)
     .then((article) => {
       res.status(200).send({ article });
     })
@@ -16,7 +21,12 @@ exports.getArticle = (req, res, next) => {
 };
 
 exports.patchArticleVotes = (req, res, next) => {
-  modifyArticleVotes(req.params, req.body)
+  const {
+    params: { article_id },
+    body: { inc_votes },
+  } = req;
+
+  modifyArticleVotes(article_id, inc_votes)
     .then((article) => {
       res.status(200).send({ article });
     })
@@ -27,10 +37,16 @@ exports.patchArticleVotes = (req, res, next) => {
 };
 
 exports.getAllArticles = (req, res, next) => {
-  const { sort_by, order, author, topic } = req.query;
+  const {
+    query: { sort_by, order, author, topic },
+  } = req;
 
-  fetchAllArticles(sort_by, order, author, topic)
-    .then((articles) => {
+  const promises = [fetchAllArticles(sort_by, order, author, topic)];
+  if (topic) promises.push(checkIfTopicExists(topic));
+  if (author) promises.push(checkIfArticleAuthorExists(author));
+
+  Promise.all(promises)
+    .then(([articles]) => {
       return res.status(200).send({ articles });
     })
     .catch((err) => {

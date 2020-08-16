@@ -1,7 +1,6 @@
 const express = require("express");
 const apiRouter = require("./routers/api.router");
 const {
-  handle405sInvalidMethods,
   handle500s,
   handleCustomErrors,
   handlePSQL400Errors,
@@ -12,6 +11,10 @@ const app = express();
 app.use(express.json());
 
 app.use("/api", apiRouter);
+
+app.all("*", (req, res, next) => {
+  res.status(404).send({ msg: "Path not found" });
+});
 
 app.use(handlePSQL400Errors);
 app.use(handlePSQL404Errors);

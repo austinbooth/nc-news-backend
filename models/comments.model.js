@@ -1,7 +1,6 @@
 const db = require("../db/connection");
-const { username } = require("../user.info");
 
-exports.addComment = ({ article_id }, { username: author, body }) => {
+exports.addComment = (article_id, author, body) => {
   if (body === undefined || body.length === 0)
     return Promise.reject({ status: 400, msg: "Invalid - body not given" });
   if (author === undefined || author.length === 0)
@@ -13,36 +12,35 @@ exports.addComment = ({ article_id }, { username: author, body }) => {
       body,
     })
     .returning("*")
-    .then((comment) => {
-      comment[0].created_at = comment[0].created_at.toISOString();
-      return comment[0];
+    .then(([comment]) => {
+      comment.created_at = comment.created_at.toISOString();
+      return comment;
     });
 };
 
-exports.fetchCommentsByArticleId = ({ article_id }) => {
+exports.fetchCommentsByArticleId = (article_id) => {
   return db.select().from("comments").where("article_id", article_id);
 };
 
-exports.updateCommentVotes = ({ comment_id }, { inc_votes }) => {
-  if (inc_votes === undefined) inc_votes = 0;
+exports.updateCommentVotes = (comment_id, inc_votes = 0) => {
   return db("comments")
     .where({ comment_id })
     .increment("votes", inc_votes)
     .returning("*")
-    .then((comment) => {
-      if (comment.length === 0)
+    .then(([comment]) => {
+      if (comment === undefined)
         return Promise.reject({ status: 404, msg: "comment not found" });
-      return comment[0];
+      return comment;
     });
 };
 
-exports.removeCommentById = ({ comment_id }) => {
+exports.removeCommentById = (comment_id) => {
   return db("comments")
     .where({ comment_id })
     .del()
     .returning("*")
-    .then((deleted) => {
-      if (deleted.length === 0)
+    .then(([deleted]) => {
+      if (deleted === undefined)
         return Promise.reject({ status: 404, msg: "Comment not found" });
     });
 };

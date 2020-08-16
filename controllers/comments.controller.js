@@ -5,9 +5,14 @@ const {
   removeCommentById,
 } = require("../models/comments.model");
 const { checkIfArticleExists } = require("../models/articles.model");
+const articlesRouter = require("../routers/articles.router");
 
 exports.postComment = (req, res, next) => {
-  addComment(req.params, req.body)
+  const {
+    params: { article_id },
+    body: { username: author, body },
+  } = req;
+  addComment(article_id, author, body)
     .then((comment) => {
       res.status(201).send({ comment });
     })
@@ -21,9 +26,12 @@ exports.postComment = (req, res, next) => {
 };
 
 exports.getCommentsByArticleId = (req, res, next) => {
+  const {
+    params: { article_id },
+  } = req;
   Promise.all([
-    fetchCommentsByArticleId(req.params),
-    checkIfArticleExists(req.params),
+    fetchCommentsByArticleId(article_id),
+    checkIfArticleExists(article_id),
   ])
     .then(([comments]) => res.status(200).send({ comments }))
     .catch((err) => {
@@ -33,7 +41,11 @@ exports.getCommentsByArticleId = (req, res, next) => {
 };
 
 exports.patchCommentVotes = (req, res, next) => {
-  updateCommentVotes(req.params, req.body)
+  const {
+    params: { comment_id },
+    body: { inc_votes },
+  } = req;
+  updateCommentVotes(comment_id, inc_votes)
     .then((comment) => res.status(200).send({ comment }))
     .catch((err) => {
       err.reason = "comment id or payload";
@@ -42,9 +54,13 @@ exports.patchCommentVotes = (req, res, next) => {
 };
 
 exports.deleteCommentById = (req, res, next) => {
-  removeCommentById(req.params)
+  const {
+    params: { comment_id },
+  } = req;
+  removeCommentById(comment_id)
     .then(() => res.sendStatus(204))
     .catch((err) => {
       err.reason = "comment id";
-      return next(err)});
+      return next(err);
+    });
 };

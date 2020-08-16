@@ -9,6 +9,11 @@
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
+  "GET /api/users/:username": {
+    "description": "",
+    "queries": [],
+    "exampleResponse": {}
+  },
   "GET /api/articles": {
     "description": "serves an array of all topics",
     "queries": ["author", "topic", "sort_by", "order"],
@@ -16,12 +21,33 @@
       "articles": [
         {
           "title": "Seafood substitutions are increasing",
+          "article_id": "",
           "topic": "cooking",
           "author": "weegembump",
-          "body": "Text from the article..",
-          "created_at": 1527695953341
+          "created_at": 1527695953341,
+          "votes": ""
         }
       ]
     }
+  },
+  "": {
+    "description": "",
+    "queries": [],
+    "exampleResponse": {}
+  },
+  "": {
+    "description": "",
+    "queries": [],
+    "exampleResponse": {}
+  },
+  "": {
+    "description": "",
+    "queries": [],
+    "exampleResponse": {}
+  },
+  "": {
+    "description": "",
+    "queries": [],
+    "exampleResponse": {}
   }
 }

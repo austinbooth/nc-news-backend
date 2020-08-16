@@ -10,6 +10,29 @@ describe("app", () => {
     return db.destroy();
   });
   describe("/api", () => {
+    it("GET: 200 - responds with JSON describing all API endpoints", () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({ body: { endpoints } }) => {
+          expect(endpoints).toHaveProperty("GET /api");
+          expect(endpoints).toHaveProperty("GET /api/topics");
+          // expect(endpoints).toHaveProperty("GET /api/users/:username");
+          expect(endpoints).toHaveProperty("GET /api/articles");
+          // expect(endpoints).toHaveProperty("GET /api/articles/:article_id");
+          // expect(endpoints).toHaveProperty("PATCH /api/articles/:article_id");
+          // expect(endpoints).toHaveProperty(
+          //   "POST /api/articles/:article_id/comments"
+          // );
+          // expect(endpoints).toHaveProperty("/api/comments");
+        });
+    });
+    it("ALL METHODS - repsponds with an appropriate error message when an invalid API endpoint is requested", () => {
+      return request(app)
+        .get("/api/xyz")
+        .expect(404)
+        .then(({ body: { msg } }) => expect(msg).toBe("Path not found"));
+    });
     describe("/topics", () => {
       it("GET: 200 - responds with an array of topic objects", () => {
         return request(app)
@@ -157,7 +180,7 @@ describe("app", () => {
           .expect(400)
           .then(({ body: { msg } }) => expect(msg).toBe("Invalid query"));
       });
-      it("GET: 200 - returns articles filtered by author", () => {
+      it("GET: 200 - returns articles by specific author", () => {
         return request(app)
           .get("/api/articles?author=butter_bridge")
           .expect(200)
@@ -166,7 +189,7 @@ describe("app", () => {
             expect(articles.length).toBe(3);
           });
       });
-      it("GET: 200 - returns articles filtered by topic", () => {
+      it("GET: 200 - returns articles by specific topic", () => {
         return request(app)
           .get("/api/articles?topic=mitch")
           .expect(200)
@@ -175,13 +198,20 @@ describe("app", () => {
             expect(articles.length).toBe(11);
           });
       });
-      it("GET: 200 - returns no articles when given a topic which doesn't exist", () => {
+      it("GET: 404 - returns an appropriate error message when given a topic which doesn't exist", () => {
         return request(app)
           .get("/api/articles?topic=mitchh")
-          .expect(200)
-          .then(({ body: { articles } }) => {
-            expect(Array.isArray(articles)).toBe(true);
-            expect(articles.length).toBe(0);
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Topic not found");
+          });
+      });
+      it("GET: 404 - returns an appropriate error message when given an author which doesn't exist", () => {
+        return request(app)
+          .get("/api/articles?author=mitchh")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Author not found");
           });
       });
       it("Invalid methods: 405 - responds with an appropriate error", () => {
@@ -212,6 +242,25 @@ describe("app", () => {
                   created_at: new Date(1542284514171).toISOString(),
                   votes: 100,
                   comment_count: 13,
+                })
+              );
+            });
+        });
+        it("GET: 200 - responds with the correct article details when given an article id which has zero comments - testing join works when article has no comments", () => {
+          return request(app)
+            .get("/api/articles/2")
+            .expect(200)
+            .then(({ body: { article } }) => {
+              expect(article).toEqual(
+                expect.objectContaining({
+                  author: "icellusedkars",
+                  title: "Sony Vaio; or, The Laptop",
+                  article_id: 2,
+                  body: expect.any(String),
+                  topic: "mitch",
+                  created_at: expect.any(String),
+                  votes: 0,
+                  comment_count: 0,
                 })
               );
             });
