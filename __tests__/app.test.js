@@ -211,7 +211,7 @@ describe("app", () => {
           .get("/api/articles?author=mitchh")
           .expect(404)
           .then(({ body: { msg } }) => {
-            expect(msg).toBe("Author not found");
+            expect(msg).toBe("Article or author not found");
           });
       });
       it("Invalid methods: 405 - responds with an appropriate error", () => {
@@ -536,7 +536,7 @@ describe("app", () => {
               .get("/api/articles/999/comments")
               .expect(404)
               .then(({ body: { msg } }) =>
-                expect(msg).toBe("Article not found")
+                expect(msg).toBe("Article or author not found")
               );
           });
           it("GET: 400 - responds with an appropriate error when an invalid article_id is used", () => {

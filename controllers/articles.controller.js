@@ -2,7 +2,7 @@ const {
   fetchArticle,
   modifyArticleVotes,
   fetchAllArticles,
-  checkIfArticleAuthorExists,
+  checkIfArticleOrAuthorExists,
 } = require("../models/articles.model");
 const { checkIfTopicExists } = require("../models/topics.model");
 
@@ -43,7 +43,7 @@ exports.getAllArticles = (req, res, next) => {
 
   const promises = [fetchAllArticles(sort_by, order, author, topic)];
   if (topic) promises.push(checkIfTopicExists(topic));
-  if (author) promises.push(checkIfArticleAuthorExists(author));
+  if (author) promises.push(checkIfArticleOrAuthorExists("", author));
 
   Promise.all(promises)
     .then(([articles]) => {

@@ -8,11 +8,11 @@ exports.fetchArticle = (article_id) => {
     .where("articles.article_id", article_id)
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy("articles.article_id")
-    .then((article) => {
-      if (article.length === 0)
+    .then(([article]) => {
+      if (article === undefined)
         return Promise.reject({ status: 404, msg: "Article not found" });
-      article[0].comment_count = +article[0].comment_count;
-      return article[0];
+      article.comment_count = +article.comment_count;
+      return article;
     });
 };
 
@@ -21,30 +21,26 @@ exports.modifyArticleVotes = (article_id, inc_votes = 0) => {
     .where("article_id", article_id)
     .increment("votes", inc_votes)
     .returning("*")
-    .then((article) => {
-      if (article.length === 0)
-        return Promise.reject({ status: 404, msg: "Article not found" });
-      return article[0];
-    });
-};
-
-exports.checkIfArticleExists = (article_id) => {
-  return db("articles")
-    .where({ article_id })
-    .then((article) => {
-      if (article.length === 0)
+    .then(([article]) => {
+      if (article === undefined)
         return Promise.reject({ status: 404, msg: "Article not found" });
       return article;
     });
 };
 
-exports.checkIfArticleAuthorExists = (author) => {
+exports.checkIfArticleOrAuthorExists = (article_id, author) => {
   return db("articles")
-    .where({ author })
-    .then((articles) => {
-      if (articles.length === 0)
-        return Promise.reject({ status: 404, msg: "Author not found" });
-      return articles;
+    .modify((query) => {
+      if (article_id) query.where({ article_id });
+      if (author) query.where({ author });
+    })
+    .then(([article]) => {
+      if (article === undefined)
+        return Promise.reject({
+          status: 404,
+          msg: "Article or author not found",
+        });
+      return article;
     });
 };
 
