@@ -11,7 +11,6 @@ exports.fetchArticle = (article_id) => {
     .then(([article]) => {
       if (article === undefined)
         return Promise.reject({ status: 404, msg: "Article not found" });
-      article.comment_count = +article.comment_count;
       return article;
     });
 };

@@ -241,7 +241,7 @@ describe("app", () => {
                   topic: "mitch",
                   created_at: new Date(1542284514171).toISOString(),
                   votes: 100,
-                  comment_count: 13,
+                  comment_count: "13",
                 })
               );
             });
@@ -260,7 +260,7 @@ describe("app", () => {
                   topic: "mitch",
                   created_at: expect.any(String),
                   votes: 0,
-                  comment_count: 0,
+                  comment_count: "0",
                 })
               );
             });
