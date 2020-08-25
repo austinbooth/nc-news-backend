@@ -4,10 +4,12 @@ const {
   patchArticleVotes,
   getAllArticles,
 } = require("../controllers/articles.controller");
+
 const {
   postComment,
   getCommentsByArticleId,
 } = require("../controllers/comments.controller");
+
 const { handle405sInvalidMethods } = require("../errors");
 
 articlesRouter.route("/").get(getAllArticles).all(handle405sInvalidMethods);

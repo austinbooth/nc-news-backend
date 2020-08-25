@@ -28,14 +28,16 @@ exports.postComment = (req, res, next) => {
 exports.getCommentsByArticleId = (req, res, next) => {
   const {
     params: { article_id },
+    query: { order, sort_by },
   } = req;
+
   Promise.all([
-    fetchCommentsByArticleId(article_id),
+    fetchCommentsByArticleId(article_id, order, sort_by),
     checkIfArticleOrAuthorExists(article_id),
   ])
     .then(([comments]) => res.status(200).send({ comments }))
     .catch((err) => {
-      err.reason = "article id";
+      err.reason = "article id or query";
       next(err);
     });
 };

@@ -18,8 +18,18 @@ exports.addComment = (article_id, author, body) => {
     });
 };
 
-exports.fetchCommentsByArticleId = (article_id) => {
-  return db.select().from("comments").where("article_id", article_id);
+exports.fetchCommentsByArticleId = (
+  article_id,
+  order = "desc",
+  sort_by = "created_at"
+) => {
+  if (order === "asc" || order === "desc") {
+    return db
+      .select()
+      .from("comments")
+      .where("article_id", article_id)
+      .orderBy(sort_by, order);
+  } else return Promise.reject({ status: 400, msg: "Invalid query" });
 };
 
 exports.updateCommentVotes = (comment_id, inc_votes = 0) => {

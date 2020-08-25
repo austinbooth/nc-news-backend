@@ -522,6 +522,54 @@ describe("app", () => {
                 );
               });
           });
+          it("GET: 200 - default sorts the comments array objects by date in descending order", () => {
+            return request(app)
+              .get("/api/articles/1/comments")
+              .expect(200)
+              .then(({ body: { comments } }) =>
+                expect(comments).toBeSortedBy("created_at", {
+                  descending: true,
+                })
+              );
+          });
+          it("GET: 200 - can sort the comments array objects by date in ascending order", () => {
+            return request(app)
+              .get("/api/articles/1/comments?order=asc")
+              .expect(200)
+              .then(({ body: { comments } }) =>
+                expect(comments).toBeSortedBy("created_at", {
+                  descending: false,
+                })
+              );
+          });
+          it("GET: 400 - returns an appropriate error message for an invalid order value", () => {
+            return request(app)
+              .get("/api/articles/1/comments?order=bacon")
+              .expect(400)
+              .then(({ body: { msg } }) => expect(msg).toBe("Invalid query"));
+          });
+          it("GET: 200 - can sort comments by any valid column", () => {
+            const sortBy = ["comment_id", "votes", "author", "body"];
+            const promises = sortBy.map((col) => {
+              return request(app)
+                .get(`/api/articles/1/comments?sort_by=${col}`)
+                .expect(200)
+                .then(({ body: { comments } }) =>
+                  expect(comments).toBeSortedBy(`${col}`, {
+                    descending: true,
+                  })
+                );
+            });
+            return Promise.all(promises);
+          });
+          it("GET: 400 - responds with an appropriate error message when passes an invalid column", () => {
+            return request(app)
+              .get("/api/articles/1/comments?sort_by=pie")
+              .expect(400)
+              .then(({ body: { msg } }) =>
+                expect(msg).toBe("Invalid article id or query")
+              );
+          });
           it("GET: 200 - responds with an empty array when there are no comments for an article_id which exists", () => {
             return request(app)
               .get("/api/articles/2/comments")
@@ -544,7 +592,7 @@ describe("app", () => {
               .get("/api/articles/ilovejs/comments")
               .expect(400)
               .then(({ body: { msg } }) =>
-                expect(msg).toBe("Invalid article id")
+                expect(msg).toBe("Invalid article id or query")
               );
           });
           it("Invalid methods: 405 - responds with an appropriate error", () => {
