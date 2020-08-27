@@ -206,12 +206,12 @@ describe("app", () => {
             expect(msg).toBe("Topic not found");
           });
       });
-      it("GET: 404 - returns an appropriate error message when given an author which doesn't exist", () => {
+      it.only("GET: 200 - returns an empty array when given an author which doesn't exist", () => {
         return request(app)
           .get("/api/articles?author=mitchh")
-          .expect(404)
-          .then(({ body: { msg } }) => {
-            expect(msg).toBe("Article or author not found");
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).toBe(0);
           });
       });
       it("Invalid methods: 405 - responds with an appropriate error", () => {
