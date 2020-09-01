@@ -84,11 +84,23 @@ describe("app", () => {
           .expect(404)
           .then(({ body: { msg } }) => expect(msg).toBe("User not found"));
       });
-      it("Invalid methods: 405 - responds with an appropriate error", () => {
+      it("Invalid methods /api/users: 405 - responds with an appropriate error", () => {
         const invalidMethods = ["post", "patch", "put", "delete"];
         const promises = invalidMethods.map((method) => {
           return request(app)
             [method]("/api/users")
+            .expect(405)
+            .then(({ body: { msg } }) =>
+              expect(msg).toBe("Method not allowed")
+            );
+        });
+        return Promise.all(promises);
+      });
+      it("Invalid methods /api/users/butter_bridge: 405 - responds with an appropriate error", () => {
+        const invalidMethods = ["post", "patch", "put", "delete"];
+        const promises = invalidMethods.map((method) => {
+          return request(app)
+            [method]("/api/users/butter_bridge")
             .expect(405)
             .then(({ body: { msg } }) =>
               expect(msg).toBe("Method not allowed")
@@ -206,7 +218,7 @@ describe("app", () => {
             expect(msg).toBe("Topic not found");
           });
       });
-      it.only("GET: 200 - returns an empty array when given an author which doesn't exist", () => {
+      it("GET: 200 - returns an empty array when given an author which doesn't exist", () => {
         return request(app)
           .get("/api/articles?author=mitchh")
           .expect(200)
@@ -584,7 +596,7 @@ describe("app", () => {
               .get("/api/articles/999/comments")
               .expect(404)
               .then(({ body: { msg } }) =>
-                expect(msg).toBe("Article or author not found")
+                expect(msg).toBe("Article not found")
               );
           });
           it("GET: 400 - responds with an appropriate error when an invalid article_id is used", () => {

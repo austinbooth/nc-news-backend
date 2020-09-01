@@ -4,7 +4,7 @@ const {
   updateCommentVotes,
   removeCommentById,
 } = require("../models/comments.model");
-const { checkIfArticleOrAuthorExists } = require("../models/articles.model");
+const { checkIfArticleExists } = require("../models/articles.model");
 const articlesRouter = require("../routers/articles.router");
 
 exports.postComment = (req, res, next) => {
@@ -33,7 +33,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
 
   Promise.all([
     fetchCommentsByArticleId(article_id, order, sort_by),
-    checkIfArticleOrAuthorExists(article_id),
+    checkIfArticleExists(article_id),
   ])
     .then(([comments]) => res.status(200).send({ comments }))
     .catch((err) => {

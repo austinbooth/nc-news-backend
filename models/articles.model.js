@@ -27,18 +27,32 @@ exports.modifyArticleVotes = (article_id, inc_votes = 0) => {
     });
 };
 
-exports.checkIfArticleOrAuthorExists = (article_id, author) => {
+exports.checkIfArticleExists = (article_id) => {
   return db("articles")
     .modify((query) => {
       if (article_id) query.where({ article_id });
-      if (author) query.where({ author });
     })
     .then(([article]) => {
       if (article === undefined)
         return Promise.reject({
           status: 404,
-          msg: "Article or author not found",
+          msg: "Article not found",
         });
+      return article;
+    });
+};
+
+exports.checkIfAuthorExists = (author) => {
+  return db("articles")
+    .modify((query) => {
+      if (author) query.where({ author });
+    })
+    .then(([article]) => {
+      if (article === undefined)
+        return {
+          status: 200,
+          articles: [],
+        };
       return article;
     });
 };
