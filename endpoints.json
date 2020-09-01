@@ -10,9 +10,15 @@
     }
   },
   "GET /api/users/:username": {
-    "description": "",
+    "description": "serves a json representation of all the user information",
     "queries": [],
-    "exampleResponse": {}
+    "exampleResponse": {
+      "user": {
+        "username": "jessjelly",
+        "avatar_url": "https://vignette.wikia.nocookie.net/mrmen/images/4/4f/MR_JELLY_4A.jpg/revision/latest?cb=20180104121141",
+        "name": "Jess Jelly"
+      }
+    }
   },
   "GET /api/articles": {
     "description": "serves an array of all topics",
