@@ -1,14 +1,14 @@
 # Northcoders News API
 
-Welcome to my Northcoders News API, the backend for a Reddit-style app.
+Welcome to my Northcoders News API, the backend for a Reddit-style news app.
 
 You can find the hosted verson here: https://nc-news-ab.herokuapp.com/api/
 
-This project was built as one of the projects on the [Northcoders coding bootcamp] (https://northcoders.com/). It uses the following technologies:
+This project was built as one of the projects on the [Northcoders coding bootcamp](https://northcoders.com/). It uses the following technologies:
 
 - Node.js
-- Postgres
 - Express
+- PostgreSQL
 - Knex
 
 It was built following the test-driven development (TDD) process using Jest and Supertest.
@@ -81,7 +81,7 @@ module.exports = userInfo;
 
 **Note:** If you are using Mac OS you will not need this file as your machine will remember your PSQL username and password.
 
-### Setting up database
+### Setting up the database
 
 This API uses two databases, a test database and a development database.
 
@@ -91,3 +91,21 @@ To create both databases and seed them, run the following scripts in your termin
 npm run setup-dbs
 npm run seed
 ```
+
+## Running the Tests
+
+Jest was used for automated testing (TDD) whilst developing this API. To execute the tests, run the following command:
+
+```
+npm test
+```
+
+To run the tests written for the utils functions, run the following command:
+
+```
+npm test utils
+```
+
+## Acknowledgments
+
+I'd like to thank the team at Northcoders for providing me with the knowledge and skills to create this API.
